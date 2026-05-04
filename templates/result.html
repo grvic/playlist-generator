@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎉 Playlist Created!</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container { max-width: 600px; width: 90%; padding: 2rem; }
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+        .success-icon { font-size: 4rem; margin-bottom: 1rem; }
+        h1 { font-size: 1.8rem; margin-bottom: 0.5rem; color: #4ecdc4; }
+        .playlist-name { font-size: 1.2rem; color: #ccc; margin-bottom: 1.5rem; }
+        .stats { display: flex; justify-content: center; gap: 2rem; margin: 1.5rem 0; }
+        .stat-value { font-size: 2rem; font-weight: 700; color: #4ecdc4; }
+        .stat-label { font-size: 0.85rem; color: #888; }
+        .link {
+            display: inline-block;
+            margin-top: 1.5rem;
+            padding: 1rem 2rem;
+            background: linear-gradient(90deg, #e94560, #533483);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        .link:hover { opacity: 0.9; }
+        .back-link {
+            display: inline-block;
+            margin-top: 1rem;
+            color: #888;
+            text-decoration: none;
+        }
+        .back-link:hover { color: #ccc; }
+        .skipped {
+            margin-top: 1.5rem;
+            text-align: left;
+            font-size: 0.85rem;
+            color: #888;
+        }
+        .skipped li { margin: 0.25rem 0 0.25rem 1rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="success-icon">🎉</div>
+            <h1>Playlist Created!</h1>
+            <p class="playlist-name">{{ result.playlist_name }}</p>
+
+            <div class="stats">
+                <div>
+                    <div class="stat-value">{{ result.tracks_added }}</div>
+                    <div class="stat-label">tracks added</div>
+                </div>
+                <div>
+                    <div class="stat-value">{{ result.tracks_skipped }}</div>
+                    <div class="stat-label">skipped</div>
+                </div>
+            </div>
+
+            <a href="{{ result.playlist_url }}" target="_blank" class="link">
+                ▶️ Open on YouTube
+            </a>
+            <br>
+            <a href="/" class="back-link">← Create another playlist</a>
+
+            {% if result.skipped_tracks %}
+            <div class="skipped">
+                <strong>Skipped tracks:</strong>
+                <ul>
+                    {% for t in result.skipped_tracks[:10] %}
+                    <li>{{ t.artist }} - {{ t.title }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

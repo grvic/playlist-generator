@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎵 Playlist Generator</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            max-width: 700px;
+            width: 90%;
+            padding: 2rem;
+        }
+        h1 {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, #e94560, #533483);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .subtitle {
+            text-align: center;
+            color: #888;
+            margin-bottom: 2rem;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #ccc;
+        }
+        textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            color: #fff;
+            font-size: 1rem;
+            resize: vertical;
+            margin-bottom: 1.5rem;
+        }
+        textarea:focus { outline: none; border-color: #e94560; }
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: linear-gradient(90deg, #e94560, #533483);
+            color: white;
+            transition: transform 0.1s, opacity 0.2s;
+        }
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn:active { transform: translateY(0); }
+        .error {
+            background: rgba(233, 69, 96, 0.2);
+            border: 1px solid #e94560;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        .examples {
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .examples p { color: #666; font-size: 0.85rem; margin-bottom: 0.5rem; }
+        .examples code {
+            display: block;
+            background: rgba(0,0,0,0.3);
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 Playlist Generator</h1>
+        <p class="subtitle">AI-powered YouTube playlist creation</p>
+
+        <div class="card">
+            {% if error %}
+            <div class="error">⚠️ {{ error }}</div>
+            {% endif %}
+
+            <form method="POST" action="/plan">
+                <label for="prompt">Describe your playlist</label>
+                <textarea
+                    name="prompt"
+                    id="prompt"
+                    placeholder="e.g., A chill lo-fi playlist for studying, about 2 hours long. I like Nujabes, J Dilla, and Bonobo. Something with jazzy vibes and smooth beats."
+                    required
+                ></textarea>
+                <button type="submit" class="btn">✨ Generate Playlist Plan</button>
+            </form>
+
+            <div class="examples">
+                <p>💡 Examples:</p>
+                <code>"Energetic workout mix, 45 minutes, like Daft Punk and Justice"</code>
+                <code>"Melancholic indie rock, 30 songs, Radiohead / Bon Iver vibes"</code>
+                <code>"90s hip-hop classics, 1 hour, Nas, Wu-Tang, A Tribe Called Quest"</code>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
