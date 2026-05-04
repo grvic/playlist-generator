@@ -7,6 +7,7 @@ from .config import (
     MUSICBRAINZ_BASE_URL, MUSICBRAINZ_USER_AGENT,
     DEFAULT_MAX_TRACKS_PER_ARTIST,
 )
+from typing import Optional, List, Dict
 from .schemas import TrackCandidate
 
 # Rate limiting state
@@ -117,7 +118,7 @@ def get_artist_tags(artist: str) -> list[str]:
     return []
 
 
-def musicbrainz_search_artist(artist: str) -> dict | None:
+def musicbrainz_search_artist(artist: str) -> Optional[dict]:
     """Search MusicBrainz for artist disambiguation."""
     _rate_limit_musicbrainz()
     try:

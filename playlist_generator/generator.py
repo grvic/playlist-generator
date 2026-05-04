@@ -1,6 +1,7 @@
 """Orchestrates the full playlist generation pipeline."""
 
 import random
+from typing import Optional
 from .schemas import PlaylistRequest, PlaylistPlan, TrackCandidate, YouTubeMatch, PlaylistResult
 from .ai_engine import parse_user_prompt, suggest_additional_artists
 from .music_graph import expand_artist_graph, get_top_tracks
@@ -11,6 +12,7 @@ from .youtube_client import (
 from .config import (
     DEFAULT_PLAYLIST_SIZE, DEFAULT_MAX_TRACKS_PER_ARTIST,
     DEFAULT_MAX_ARTISTS_EXPANDED, YOUTUBE_DAILY_QUOTA,
+    DEFAULT_FESTIVAL_TRACKS_PER_ARTIST, MAX_FESTIVAL_TRACKS_PER_ARTIST,
 )
 
 
@@ -122,3 +124,79 @@ def execute_plan(plan: PlaylistPlan, min_confidence: float = 0.3) -> PlaylistRes
     result.tracks_skipped += len(skipped)
 
     return result
+
+
+def generate_festival_plan(
+    artists: list[str],
+    tracks_per_artist: int = DEFAULT_FESTIVAL_TRACKS_PER_ARTIST,
+    name: Optional[str] = None,
+) -> PlaylistPlan:
+    """Generate a playlist plan from an explicit artist list (festival mode).
+
+    No AI expansion — only the provided artists are used.
+    Tracks are interleaved round-robin for variety.
+    """
+    # Validate and normalize inputs
+    cleaned = []
+    seen = set()
+    for a in artists:
+        normalized = a.strip()
+        if not normalized:
+            continue
+        if normalized.lower() in seen:
+            continue
+        seen.add(normalized.lower())
+        cleaned.append(normalized)
+
+    if not cleaned:
+        raise ValueError("Please provide at least one artist.")
+
+    tracks_per_artist = max(1, min(tracks_per_artist, MAX_FESTIVAL_TRACKS_PER_ARTIST))
+
+    # Fetch top tracks per artist
+    artist_tracks: dict[str, list[TrackCandidate]] = {}
+    for artist in cleaned:
+        tracks = get_top_tracks(artist, limit=tracks_per_artist)
+        artist_tracks[artist] = tracks
+
+    # Round-robin interleave for better listening flow
+    final_tracks: list[TrackCandidate] = []
+    for i in range(tracks_per_artist):
+        for artist in cleaned:
+            if i < len(artist_tracks[artist]):
+                final_tracks.append(artist_tracks[artist][i])
+
+    if not final_tracks:
+        raise ValueError("Could not find tracks for any of the provided artists. Check the names and try again.")
+
+    # Build playlist name
+    if not name:
+        if len(cleaned) <= 4:
+            name = f"🎪 Festival Prep: {', '.join(cleaned)}"
+        else:
+            name = f"🎪 Festival Prep: {', '.join(cleaned[:3])} & {len(cleaned) - 3} more"
+
+    # Summary of what was fetched vs requested
+    shortfalls = [
+        f"{a} ({len(artist_tracks[a])}/{tracks_per_artist})"
+        for a in cleaned
+        if len(artist_tracks[a]) < tracks_per_artist
+    ]
+    description = f"Festival playlist | {len(cleaned)} artists, up to {tracks_per_artist} songs each"
+    if shortfalls:
+        description += f" | Fewer tracks available: {', '.join(shortfalls)}"
+
+    estimated_quota = estimate_quota(len(final_tracks))
+    estimated_duration = None
+    tracks_with_duration = [t for t in final_tracks if t.duration_seconds]
+    if tracks_with_duration:
+        avg_duration = sum(t.duration_seconds for t in tracks_with_duration) / len(tracks_with_duration)
+        estimated_duration = int((avg_duration * len(final_tracks)) / 60)
+
+    return PlaylistPlan(
+        name=name,
+        description=description,
+        tracks=final_tracks,
+        estimated_duration_minutes=estimated_duration,
+        estimated_youtube_quota=estimated_quota,
+    )

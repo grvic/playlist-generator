@@ -28,18 +28,19 @@ Be generous with mood_tags and genres - the more the better for discovery."""
 
 
 def get_client() -> AzureOpenAI:
-    """Create Azure OpenAI client."""
-    # Parse the endpoint to extract base URL and deployment info
-    # The endpoint format is: https://host/api/projects/{project}/openai/v1/responses
-    # We need: https://host/api/projects/{project}
-    base = AZURE_OPENAI_ENDPOINT
-    if "/openai/" in base:
-        base = base.split("/openai/")[0]
+    """Create Azure OpenAI client compatible with Azure AI Foundry projects."""
+    # The endpoint is a full Azure AI Foundry URL, use it as base_url directly
+    base_url = AZURE_OPENAI_ENDPOINT
+    # Ensure it ends properly for chat completions
+    if base_url.endswith("/responses"):
+        base_url = base_url.replace("/responses", "")
+    if not base_url.endswith("/"):
+        base_url += "/"
 
-    return AzureOpenAI(
-        azure_endpoint=base,
+    from openai import OpenAI
+    return OpenAI(
+        base_url=base_url,
         api_key=AZURE_OPENAI_API_KEY,
-        api_version="2024-12-01-preview",
     )
 
 

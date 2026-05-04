@@ -5,15 +5,16 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
 
-from .generator import generate_plan, execute_plan
+from .generator import generate_plan, generate_festival_plan, execute_plan
+from typing import Optional
 from .schemas import PlaylistPlan
-from .config import YOUTUBE_DAILY_QUOTA
+from .config import YOUTUBE_DAILY_QUOTA, DEFAULT_FESTIVAL_TRACKS_PER_ARTIST
 
 app = FastAPI(title="Playlist Generator", version="0.1.0")
 templates = Jinja2Templates(directory=str(Path(__file__).parent.parent / "templates"))
 
 # In-memory plan storage (single user for now)
-_current_plan: PlaylistPlan | None = None
+_current_plan: Optional[PlaylistPlan] = None
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -72,3 +73,44 @@ async def create_playlist(request: Request):
 @app.get("/health")
 async def health():
     return {"status": "ok"}
+
+
+@app.get("/festival", response_class=HTMLResponse)
+async def festival_home(request: Request):
+    """Festival mode landing page."""
+    return templates.TemplateResponse("festival.html", {
+        "request": request,
+        "default_tracks_per_artist": DEFAULT_FESTIVAL_TRACKS_PER_ARTIST,
+    })
+
+
+@app.post("/festival/plan", response_class=HTMLResponse)
+async def festival_plan(
+    request: Request,
+    artists: str = Form(...),
+    tracks_per_artist: int = Form(DEFAULT_FESTIVAL_TRACKS_PER_ARTIST),
+    playlist_name: str = Form(""),
+):
+    """Generate a festival playlist plan."""
+    global _current_plan
+    try:
+        artist_list = [a.strip() for a in artists.split("\n") if a.strip()]
+        plan = generate_festival_plan(
+            artists=artist_list,
+            tracks_per_artist=tracks_per_artist,
+            name=playlist_name.strip() or None,
+        )
+        _current_plan = plan
+        quota_pct = (plan.estimated_youtube_quota / YOUTUBE_DAILY_QUOTA) * 100
+        return templates.TemplateResponse("plan.html", {
+            "request": request,
+            "plan": plan,
+            "quota_pct": quota_pct,
+            "prompt": f"Festival mode: {', '.join(artist_list[:5])}",
+        })
+    except Exception as e:
+        return templates.TemplateResponse("festival.html", {
+            "request": request,
+            "error": str(e),
+            "default_tracks_per_artist": DEFAULT_FESTIVAL_TRACKS_PER_ARTIST,
+        })

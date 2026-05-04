@@ -12,6 +12,7 @@ from .config import (
     CLIENT_SECRET_PATH, TOKEN_PATH, YOUTUBE_SCOPES,
     YOUTUBE_SEARCH_COST, YOUTUBE_INSERT_PLAYLIST_COST, YOUTUBE_INSERT_ITEM_COST,
 )
+from typing import Optional
 from .schemas import TrackCandidate, YouTubeMatch, PlaylistResult
 
 # Keywords to filter out unwanted results
@@ -58,7 +59,7 @@ def search_track(
     youtube,
     track: TrackCandidate,
     exclude_live: bool = True,
-) -> YouTubeMatch | None:
+) -> Optional[YouTubeMatch]:
     """Search YouTube for a specific track and return the best match."""
     query = f"{track.artist} - {track.title}"
     if exclude_live:
