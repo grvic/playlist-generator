@@ -3,76 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎪 Festival Mode - Playlist Generator</title>
+    <title>Festival Mode — Playlist Generator</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #fafafa;
             min-height: 100vh;
-            color: #e0e0e0;
+            color: #1a1a1a;
             display: flex;
             align-items: center;
             justify-content: center;
         }
         .container {
-            max-width: 700px;
+            max-width: 560px;
             width: 90%;
-            padding: 2rem;
+            padding: 3rem 0;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 2.5rem;
         }
         h1 {
-            font-size: 2.5rem;
-            text-align: center;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(90deg, #f39c12, #e74c3c);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.25rem;
         }
         .subtitle {
-            text-align: center;
-            color: #888;
+            color: #666;
+            font-size: 0.95rem;
+        }
+        .mode-tabs {
+            display: flex;
+            gap: 0;
             margin-bottom: 2rem;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
+        }
+        .mode-tab {
+            flex: 1;
+            text-align: center;
+            padding: 0.75rem 1rem;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #666;
+            background: #fff;
+            transition: all 0.15s;
+        }
+        .mode-tab:hover { background: #f5f5f5; }
+        .mode-tab.active {
+            background: #1a1a1a;
+            color: #fff;
         }
         .card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
+            background: #fff;
+            border: 1px solid #e8e8e8;
+            border-radius: 14px;
             padding: 2rem;
-            backdrop-filter: blur(10px);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
         }
         label {
             display: block;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: #ccc;
+            font-weight: 500;
+            font-size: 0.9rem;
+            margin-bottom: 0.4rem;
+            color: #333;
         }
         .hint {
-            font-size: 0.85rem;
-            color: #888;
+            font-size: 0.8rem;
+            color: #999;
             margin-bottom: 0.5rem;
         }
         textarea {
             width: 100%;
-            min-height: 150px;
-            padding: 1rem;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            background: rgba(0, 0, 0, 0.3);
-            color: #fff;
-            font-size: 1rem;
+            min-height: 140px;
+            padding: 0.875rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #fafafa;
+            color: #1a1a1a;
+            font-size: 0.95rem;
+            font-family: inherit;
             resize: vertical;
             margin-bottom: 1.5rem;
+            transition: border-color 0.15s;
         }
-        textarea:focus, input:focus { outline: none; border-color: #f39c12; }
+        textarea:focus, input:focus { outline: none; border-color: #1a1a1a; background: #fff; }
+        textarea::placeholder, input::placeholder { color: #aaa; }
         input[type="number"], input[type="text"] {
             width: 100%;
             padding: 0.75rem 1rem;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            background: rgba(0, 0, 0, 0.3);
-            color: #fff;
-            font-size: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #fafafa;
+            color: #1a1a1a;
+            font-size: 0.95rem;
+            font-family: inherit;
             margin-bottom: 1.5rem;
+            transition: border-color 0.15s;
         }
         .form-row {
             display: grid;
@@ -82,50 +113,49 @@
         .btn {
             display: block;
             width: 100%;
-            padding: 1rem;
-            font-size: 1.1rem;
-            font-weight: 700;
+            padding: 0.875rem;
+            font-size: 0.95rem;
+            font-weight: 600;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
-            background: linear-gradient(90deg, #f39c12, #e74c3c);
-            color: white;
-            transition: transform 0.1s, opacity 0.2s;
+            background: #1a1a1a;
+            color: #fff;
+            transition: background 0.15s, transform 0.1s;
         }
-        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
-        .btn:active { transform: translateY(0); }
+        .btn:hover { background: #333; }
+        .btn:active { transform: scale(0.99); }
         .error {
-            background: rgba(233, 69, 96, 0.2);
-            border: 1px solid #e94560;
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-        }
-        .nav-link {
-            text-align: center;
-            margin-top: 1.5rem;
-        }
-        .nav-link a {
-            color: #888;
-            text-decoration: none;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #b91c1c;
+            border-radius: 10px;
+            padding: 0.875rem 1rem;
+            margin-bottom: 1.25rem;
             font-size: 0.9rem;
         }
-        .nav-link a:hover { color: #e94560; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎪 Festival Mode</h1>
-        <p class="subtitle">Create a playlist from your festival lineup</p>
+        <div class="header">
+            <h1>Playlist Generator</h1>
+            <p class="subtitle">Create a playlist from your festival lineup</p>
+        </div>
+
+        <div class="mode-tabs">
+            <a href="/" class="mode-tab">AI Vibe Mode</a>
+            <a href="/festival" class="mode-tab active">Festival Mode</a>
+        </div>
 
         <div class="card">
             {% if error %}
-            <div class="error">⚠️ {{ error }}</div>
+            <div class="error">{{ error }}</div>
             {% endif %}
 
             <form method="POST" action="/festival/plan">
-                <label for="artists">Artists (one per line)</label>
-                <p class="hint">Paste your festival lineup — one artist per line</p>
+                <label for="artists">Artists</label>
+                <p class="hint">One per line — paste your festival lineup</p>
                 <textarea
                     name="artists"
                     id="artists"
@@ -146,22 +176,18 @@
                         >
                     </div>
                     <div>
-                        <label for="playlist_name">Playlist name (optional)</label>
+                        <label for="playlist_name">Playlist name</label>
                         <input
                             type="text"
                             name="playlist_name"
                             id="playlist_name"
-                            placeholder="e.g., Primavera 2026 Prep"
+                            placeholder="Optional"
                         >
                     </div>
                 </div>
 
-                <button type="submit" class="btn">🎪 Generate Festival Playlist</button>
+                <button type="submit" class="btn">Generate Festival Playlist</button>
             </form>
-        </div>
-
-        <div class="nav-link">
-            <a href="/">← Back to AI Vibe Mode</a>
         </div>
     </div>
 </body>
